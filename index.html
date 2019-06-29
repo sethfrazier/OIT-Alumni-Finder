@@ -2,19 +2,38 @@
 <html class="no-js" lang="">
 
 <head>
-  <meta charset="utf-8">
-  <title></title>
-  <meta name="description" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="manifest" href="site.webmanifest">
-  <link rel="apple-touch-icon" href="icon.png">
-  <!-- Place favicon.ico in the root directory -->
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="apple-touch-icon" href="icon.png">
+    <!-- Place favicon.ico in the root directory -->
 
-  <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/main.css">
 
-  <meta name="theme-color" content="#fafafa">
+    <script src="https://kit.fontawesome.com/38801ec9a4.js"></script>
+
+    <meta name="theme-color" content="#fafafa">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin=""/>
+    <link rel ="stylesheet" href="css/vendor/MarkerCluster.css">
+    <link rel ="stylesheet" href="css/vendor/MarkerCluster.Default.css">
+   
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+        integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+        crossorigin=""></script>
+
+    <!-- Make changes to the text style...-->
+    <link href="https://fonts.googleapis.com/css?family=Signika" rel="stylesheet">
+    <link rel="stylesheet" href="css/main-styles.css">
+    <link rel="stylesheet" href="css/map-styles.css">
+
 </head>
 
 <body>
@@ -22,13 +41,115 @@
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
 
+  <header class="mainHeader">
+    <h1>OIT Alumni Map</h1>
+    <button id="main-header-menu-button"><i class="fas fa-bars fa-2x"></i></button>
+  </header>
+
+  <div id="main-header-menu" class="mainHeader__dropdownMenu">
+    <ul>
+        <li id="about-menu-item">
+            <a href="#">About This Map</a>
+        </li>
+        <li>
+            <a href="https://github.com/uw-project-group/portland-street-trees">Project Source Code</a>
+        </li>
+        <li>
+            <a href="https://www.oit.edu">About OIT</a>
+        </li>
+        <!----<li>
+            <a href="http://treecasiano.com">Map Author:  Tree Casiano</a>
+        </li>-->
+        <li>
+            <a href="https://sethfrazier.github.io">Map Author:  Seth Frazier</a>
+        </li>
+    </ul>
+</div>
+
+<div id="overlay" class="overlay">
+  <button id="overlay-close-button" class="overlay__closeButton"><i class="fas fa-times"></i></button>
+  <div class="overlay__headingContainer ">
+      <h2>Portland Street Trees</h2>
+  </div>     
+  <p>This map allows you to explore the health of neighborhood tree populations in Portland, Oregon.</p>
+  <p>Select a neighorhood to view individual trees in that neigbhorhood as well as aggregate neighborhood statistics.</p>
+  <p>Filter trees by their health condition, by tree type, and by whether or not they are near high voltage wires.</p>    
+</div>  
+
+<div id="filter-feedback" class="filter-feedback">0 results for selected filter(s)</div>
+
+<div class="infoPanel__container">
+    <div class="infoPanel">
+        <h2>Tree Population Health<br><span id="displayed-neighborhood">All Neighborhoods</span></h2>
+        <div class = "chart-container"></div>
+        <div class = "legend-container">
+            <div class = "legend-container__item">  
+                <div class="legend-circle goodColor"></div><span class="legend-text">Good</span>&nbsp;<span id="percent-good"></span>%
+            </div>
+            <div class = "legend-container__item">  
+                <div class="legend-circle fairColor"></div><span class="legend-text">Fair</span>&nbsp;<span id="percent-fair"></span>%
+            </div>
+            <div class = "legend-container__item">  
+                <div class="legend-circle poorColor"></div><span class="legend-text">Poor</span>&nbsp;<span id="percent-poor"></span>%
+            </div>
+            <div class = "legend-container__item">  
+                <div class="legend-circle deadColor"></div><span class="legend-text">Dead</span>&nbsp;<span id="percent-dead"></span>%
+            </div>
+            <br>
+        </div>
+        <label for="neigbhorbood-select-box">Select a Neighborhood:</label>
+        <select name="neighborhood-select-box" id="neigbhorbood-select-box">
+            <option value="" disabled>Select a Neighborhood</option>
+            <option value="ALL">ALL</option>
+        </select>
+        <div class="filters__container">
+            <h3>Filter Trees by Condition</h3>
+            <form class="filters" name="treeConditionFilter">
+                <label><input type="radio" name="treeCondition" value="" title="No tree condition filter." checked> All<br></label>
+                <label><input type="radio" name="treeCondition" value="good" title="Filter trees where tree condition is good." disabled> Good<br></label>
+                <label><input type="radio" name="treeCondition" value="fair" title="Filter trees where tree condition is fair." disabled> Fair<br></label>
+                <label><input type="radio" name="treeCondition" value="poor" title="Filter trees where tree condition is poor." disabled> Poor<br></label>
+                <label><input type="radio" name="treeCondition" value="dead" title="Filter trees where tree condition is dead." disabled> Dead<br></label>
+            </form>
+            <h3>Filter Trees by Presence of Wires</h3>
+                <form class=filters>
+                <label><input id="presence-of-wires-checkbox" type="checkbox" name="wireFilter" value="high voltage" title="Filter trees by presence of high voltage wires." disabled> High Voltage Only<br></label>
+            </form>
+            <h3>Filter Trees by Functional Type</h3>
+                <form class="filters">
+                <label><input type="radio" name="functionalTypeFilter" value="" title="No tree type filter." checked> All<br></label>
+                <label><input type="radio" name="functionalTypeFilter" value="bd" title="Filter broadleaf deciduous tree type." disabled> Broadleaf Deciduous (BD)<br></label>
+                <label><input type="radio" name="functionalTypeFilter" value="be" title="Filter broadleaf evergreen tree type." disabled> Broadleaf Evergreen (BE)<br></label>
+                <label><input type="radio" name="functionalTypeFilter" value="cd" title="Filter coniferous deciduous tree type." disabled> Coniferous Deciduous (CD)<br></label>
+                <label><input type="radio" name="functionalTypeFilter" value="ce" title="Filter coniferous evergreen tree type." disabled> Coniferous Evergreen (CE)<br></label>
+                <label><input type="radio" name="functionalTypeFilter" value="palm" title="Filter palm tree type." disabled> Palm<br></label>
+            </form>
+        </div>
+
+    </div>
+    <div id="panel-collapse" class="infoPanel__toggle">
+        <i class="fas fa-caret-left fa-1x"></i>
+    </div>
+</div>
+
+<div class="mainContainer">
+    <div id="map"></div>
+</div>
+
+
+
   <!-- Add your site or application content here -->
-  <p>Hello world! This is HTML5 Boilerplate.</p>
+  
   <script src="js/vendor/modernizr-3.7.1.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <script>window.jQuery || document.write('<script src="js/vendor/jquery-3.4.1.min.js"><\/script>')</script>
+  <script src="js/vendor/leaflet-providers.js"></script>
+  <script src="js/vendor/leaflet.markercluster.js"></script>
+  <!-- CDN: load the latest CARTO.js version -->
+  <script src="https://libs.cartocdn.com/carto.js/v4.1.11/carto.min.js"></script>
   <script src="js/plugins.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/geojson.js"></script>
 
   <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
   <script>
