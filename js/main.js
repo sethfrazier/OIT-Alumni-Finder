@@ -34,6 +34,7 @@ function initialize(){
     });
 
     $map.click(function() {
+        $overlay.fadeOut('slow');
         $filterFeedback.fadeOut('slow');
     });
 

@@ -7,15 +7,17 @@ function getMap(){
     var $neighborhoodSelectBox = $('#neigbhorbood-select-box');
     var $filterFeedback = $('#filter-feedback');
     var $neighborhoodDisplayText = $('#displayed-neighborhood');
+    var $degreeSelectBox = $('#degree-select-box');
 
     /* default map values */
     var pdxCenterCoords = [45.5410, -122.6769];
-    var defaultZoom = getZoomValue();
+    //var defaultZoom = getZoomValue();
+    var defaultZoom = 6;
     
     /*limits to panning*/
-    var southWest = L.latLng(45.411, -123.00),
-    northEast = L.latLng(45.67, -122.452);
-    var bounds = L.latLngBounds(southWest, northEast);
+    //var southWest = L.latLng(45.411, -123.00),
+    //northEast = L.latLng(45.67, -122.452);
+    //var bounds = L.latLngBounds(southWest, northEast);
 
      /* pseudo-globals for map */
     var selectedNeighborhood = '';
@@ -59,20 +61,20 @@ function getMap(){
     myMap = L.map('map', {layers: [cartoDB]}).setView(pdxCenterCoords, defaultZoom);
     
     //set bounds and animate the edge of panning area
-    /*myMap.setMaxBounds(bounds);
-    myMap.on('drag', function() {
-        myMap.panInsideBounds(bounds, { animate: true });
-    });*/
+    //myMap.setMaxBounds(bounds);
+    //myMap.on('drag', function() {
+        //myMap.panInsideBounds(bounds, { animate: true });
+    //});
 
     L.tileLayer.provider('CartoDB.Positron').addTo(myMap);
     L.control.layers(baseMaps).addTo(myMap);
     myMap.zoomControl.setPosition('bottomright');
-    //myMap.options.minZoom = 10;
-    //myMap.options.maxZoom = 18;
+    myMap.options.minZoom = 5;
+    myMap.options.maxZoom = 18;
 
     getData(myMap, selectedNeighborhood);
     
-    getNeighborhoodPoly(myMap);
+    //getNeighborhoodPoly(myMap);
 
     /* retrieve list of distinct neighborhoods from database and set event listeners on select box */
     getNeighborhoodList();
@@ -91,7 +93,7 @@ function getMap(){
         });
     }
     
-    presenceOfWiresCheckBox.addEventListener('click', function() {
+    /*presenceOfWiresCheckBox.addEventListener('click', function() {
         if (presenceOfWiresCheckBox.checked) {
             selectedPresenceOfWires = this.value;
         } else {
@@ -100,7 +102,7 @@ function getMap(){
         if (selectedNeighborhood.length) {
             filterAttributes();
         }
-    });
+    });*/
 
     for (var i = 0; i  < functionalTypeRadioButtons.length; i++) {
         functionalTypeRadioButtons[i].addEventListener('click', function() {
@@ -133,7 +135,7 @@ function getMap(){
                     disableClusteringAtZoom: 18,
                     showCoverageOnHover: true,
                     zoomToBoundsOnClick: true,
-                    spiderfyOnMaxZoom: false,
+                    spiderfyOnMaxZoom: true,
                     polygonOptions: {
                         color: '#66bd63',
                         weight: 2,
@@ -146,55 +148,8 @@ function getMap(){
             }
         });
     }
-
     
-
-    // Run the specified sqlQuery from CARTO, return it as a JSON, convert it to a Leaflet GeoJson, and add it to the map with a popup
-
-    // For the data source, enter the URL that goes to the SQL API, including our username and the SQL query
-    $.getJSON("https://sfrazier.carto.com/api/v2/sql?format=GeoJSON&q=SELECT*FROM alumnibyzip2019", function (data) {
-        //console.log(sqlFilteredQueryFeat);
-        // Convert the JSON to a Leaflet GeoJson
-        parkFeatures = L.geoJson(data, {
-
-            // Create a style for the points
-            pointToLayer: function (feature, latlng) {
-                
-                //get the feature category to use its icon
-                var featureType = feature.properties.feattype;
-                    return L.circleMarker(latlng, {
-                        fillColor: '#5d0000',
-                        fillOpacity: 1,
-                        color: '#ffffff',
-                        weight: 0.25,
-                        opacity: 1,
-                        radius: 2.5
-                
-                //return L.marker(latlng,{
-                    //icon: getParkFeatureIcon(featureType)
-                });
-            },
-
-            // Loop through each feature
-            onEachFeature: function (feature, layer) {
-
-                // console.log(feature.properties)
-
-                // Bind the name to a popup
-                layer.bindPopup('<b>'+feature.properties.college+'</b> <br>'+feature.properties.major);
-            }
-        
-        }).addTo(myMap)
-
-        //}).addTo(parkFeaturesGroup);
-
-        // Turn the layer on by default
-        //myMap.addLayer(parkFeaturesGroup);
-    });
-
-
-    
-    //load the neighborhoods geojson data
+   /* //load the neighborhoods geojson data
     function getNeighborhoodPoly(map){
         $.ajax("data/Neighborhood_Boundaries.geojson", {
             dataType:"json",
@@ -262,15 +217,39 @@ function getMap(){
                 } 
             }
         });
+    }*/
+
+    getDegreeList();
+
+    function getDegreeList(){
+        
+        //lurl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019";
+        //lQurery = "WHERE college ILIKE '" + selectedNeighborhood + "'ORDER BY major ASC";
+
+        console.log(selectedNeighborhood);
+
+        $.getJSON("https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019 WHERE college ILIKE 'college of HAS' ORDER BY major ASC" , function(data) {
+            $.each(data.rows, function(key, val) {
+                if (val.college !== '') {
+                    $degreeSelectBox.append($('<option/>', {
+                        value: val.major,
+                        text : val.major
+                    }));
+                }
+            });
+        });    
     }
+    
+    schoolVal = $neighborhoodSelectBox.text;
+    console.log("outside "+ schoolVal);
 
     function getNeighborhoodList() {
-        $.getJSON('https://tcasiano.carto.com/api/v2/sql/?q=SELECT DISTINCT neighborho FROM pdx_street_trees ORDER BY neighborho ASC', function(data) {
+        $.getJSON("https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT college FROM alumnibyzip2019 ORDER BY college ASC", function(data) {
             $.each(data.rows, function(key, val) {
-                if (val.neighborho !== 'PDX') {
+                if (val.college !== '') {
                     $neighborhoodSelectBox.append($('<option/>', {
-                        value: val.neighborho,
-                        text : val.neighborho
+                        value: val.college,
+                        text : val.college
                     }));
                 }
             });
@@ -280,32 +259,32 @@ function getMap(){
                 selectedNeighborhood = this.value;
                 if (selectedNeighborhood === 'ALL' || selectedNeighborhood === false) {
                     // disable all filters and clear filter values
-                    selectedTreeCondition = '';
-                    treeConditionRadioButtons[0].checked=true;
-                    for (var i = 0; i < treeConditionRadioButtons.length;  i++){
-                        treeConditionRadioButtons[i].disabled = true;
-                    }
-                    selectedFunctionalType = '';
-                    functionalTypeRadioButtons[0].checked=true;
-                    for (var i = 0; i < functionalTypeRadioButtons.length;  i++){
-                        functionalTypeRadioButtons[i].disabled = true;
-                    }
-                    selectedPresenceOfWires = '';
-                    presenceOfWiresCheckBox.checked=false;
-                    presenceOfWiresCheckBox.disabled=true;
+                    //selectedTreeCondition = '';
+                    //treeConditionRadioButtons[0].checked=true;
+                    //for (var i = 0; i < treeConditionRadioButtons.length;  i++){
+                        //treeConditionRadioButtons[i].disabled = true;
+                    //}
+                    //selectedFunctionalType = '';
+                    //functionalTypeRadioButtons[0].checked=true;
+                    //for (var i = 0; i < functionalTypeRadioButtons.length;  i++){
+                        //functionalTypeRadioButtons[i].disabled = true;
+                    //}
+                    //selectedPresenceOfWires = '';
+                    //presenceOfWiresCheckBox.checked=false;
+                    //presenceOfWiresCheckBox.disabled=true;
 
                     // set display text of selected neighborhood in info panel heading
-                    $neighborhoodDisplayText.text('All Neighborhoods');
+                    $neighborhoodDisplayText.text('All Alumni');
                 } else {
                     //enable radio buttons
-                    for (var i = 0; i < treeConditionRadioButtons.length;  i++){
-                        treeConditionRadioButtons[i].disabled = false;
-                    }
-                    for (var i = 0; i < functionalTypeRadioButtons.length;  i++){
-                        functionalTypeRadioButtons[i].disabled = false;
-                    }
+                    //for (var i = 0; i < treeConditionRadioButtons.length;  i++){
+                       // treeConditionRadioButtons[i].disabled = false;
+                    //}
+                    //for (var i = 0; i < functionalTypeRadioButtons.length;  i++){
+                    //    functionalTypeRadioButtons[i].disabled = false;
+                    //}
                     // enable checkbox
-                    presenceOfWiresCheckBox.disabled = false;
+                    //presenceOfWiresCheckBox.disabled = false;
 
                     // set display text of selected neighborhood in info panel heading
                     $neighborhoodDisplayText.text(selectedNeighborhood);
@@ -319,14 +298,14 @@ function getMap(){
                 if (selectedNeighborhood === 'ALL') {
                     // zoom out to city 
                     myMap.setView(pdxCenterCoords, defaultZoom);
-                    updateChart(allNbhdData);
-                    updateLegend(allNbhdData);
+                    //updateChart(allNbhdData);
+                    //updateLegend(allNbhdData);
                 } else {
                     var selectedNeighborhoodBounds = allBounds[selectedNeighborhood];
                     var selectedNeighborhoodTreeCondition = allConditions[selectedNeighborhood];
-                    myMap.fitBounds(selectedNeighborhoodBounds);
-                    updateChart(selectedNeighborhoodTreeCondition);
-                    updateLegend(selectedNeighborhoodTreeCondition);
+                    //myMap.fitBounds(selectedNeighborhoodBounds);
+                    //updateChart(selectedNeighborhoodTreeCondition);
+                    //updateLegend(selectedNeighborhoodTreeCondition);
                 }
 
                 getData(myMap, selectedNeighborhood);
@@ -346,7 +325,8 @@ function getMap(){
     function pointToLayer(feature, latlng) {
         var geojsonMarkerOptions =  {
             radius: 6,
-            fillColor: getFillColor(feature.properties.condition),
+            //fillColor: getFillColor(feature.properties.condition),
+            fillColor: '#0000ff',
             color: '#f2f2f2',
             weight: 1,
             opacity: 1,
@@ -375,13 +355,13 @@ function getMap(){
         //reformat text for No HV wire prop to more user-friendly text
         var wiresProps = props.wires === 'No HV' ? 'No high voltage' : props.wires;
 
-        var popupTitle = "<h1>" + props.common.toUpperCase()  + "</h1>";
+        var popupTitle = "<h1>" + props.major.toUpperCase()  + "</h1>";
         var treeScientificName = createPopupAttributeText("Scientific Name: ", props.scientific);
         var treeAddress = createPopupAttributeText("Address: ", props.address);
-        var treeCondition = createPopupAttributeText("Tree Condition: ", props.condition);
-        var wiresPresent = createPopupAttributeText("Wires Present: ", wiresProps);
-        var functionalType = createPopupAttributeText("Functional Type: ", convertTreeTypeToText(props.functional));
-        var popupContent = popupTitle + "<hr>"  + treeAddress  + treeScientificName + treeCondition + wiresPresent + functionalType;
+        //var treeCondition = createPopupAttributeText("Tree Condition: ", props.condition);
+        //var wiresPresent = createPopupAttributeText("Wires Present: ", wiresProps);
+        //var functionalType = createPopupAttributeText("Functional Type: ", convertTreeTypeToText(props.functional));
+        var popupContent = popupTitle+ "<hr>" + treeAddress  + treeScientificName //+ treeCondition + wiresPresent + functionalType;
     
         return popupContent;
     }
@@ -420,8 +400,14 @@ function getMap(){
             // is with two single quotes
             neighborhood = "SULLIVAN''S GULCH";
         }
-        var url = "https://tcasiano.carto.com/api/v2/sql?format=GeoJSON&q=";
-        var query = "SELECT * FROM pdx_street_trees WHERE neighborho ILIKE '" + neighborhood + "'";
+
+        if (neighborhood==="ALL"){
+            var url = "https://sfrazier.carto.com/api/v2/sql/?format=GeoJSON&q=";
+            var query = query = "SELECT * FROM alumnibyzip2019";
+        } else if(neighborhood!=="ALL"){
+            var url = "https://sfrazier.carto.com/api/v2/sql?format=GeoJSON&q=";
+            var query = "SELECT * FROM alumnibyzip2019 WHERE college ILIKE '" + neighborhood + "'";
+        }
         
         if (selectedTreeCondition) {
             query += "AND lower(condition) = '" + selectedTreeCondition + "'";
@@ -463,9 +449,9 @@ function getMap(){
         $('#percent-fair').html(neighborhoodValues[1].value);
         $('#percent-poor').html(neighborhoodValues[2].value);
         $('#percent-dead').html(neighborhoodValues[3].value);
-    }
+    }*/
 
-    function setChart(data) {
+    /*function setChart(data) {
         var chartWidth = 280,
         chartHeight = 240,
         radius = Math.min(chartWidth, chartHeight)/2;
@@ -545,3 +531,4 @@ function getMap(){
 }
 
 $(document).ready(getMap);
+

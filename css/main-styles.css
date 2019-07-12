@@ -283,6 +283,11 @@ input[type=checkbox]:disabled {
     z-index: 2000;
 }
 
+.infoPanel select{
+    width: 85%;
+    margin: 0 0 15px;
+}
+
 /* MEDIA QUERIES */
 
 @media only screen and (min-width: 768px) {
