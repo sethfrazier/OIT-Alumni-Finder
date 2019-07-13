@@ -78,26 +78,11 @@
     <div class="infoPanel__container">
         <div class="infoPanel">
             <h2>Alumni Population<br><span id="displayed-neighborhood">All Alumni</span></h2>
-            <div class = "chart-container"></div>
-            <div class = "legend-container">
-                <div class = "legend-container__item">  
-                    <div class="legend-circle goodColor"></div><span class="legend-text">Good</span>&nbsp;<span id="percent-good"></span>%
-                </div>
-                <div class = "legend-container__item">  
-                    <div class="legend-circle fairColor"></div><span class="legend-text">Fair</span>&nbsp;<span id="percent-fair"></span>%
-                </div>
-                <div class = "legend-container__item">  
-                    <div class="legend-circle poorColor"></div><span class="legend-text">Poor</span>&nbsp;<span id="percent-poor"></span>%
-                </div>
-                <div class = "legend-container__item">  
-                    <div class="legend-circle deadColor"></div><span class="legend-text">Dead</span>&nbsp;<span id="percent-dead"></span>%
-                </div>
-                <br>
-            </div>
-            <label for="neigbhorbood-select-box">Select a Neighborhood:</label>
+            <!--Maybe this should be radiobuttons?-->
+            <label for="neigbhorbood-select-box">Select a College:</label>
             
             <select name="neighborhood-select-box" id="neigbhorbood-select-box">
-                <option value="" disabled>Select a Neighborhood</option>
+                <option value="" disabled>Select a College</option>
                 <option value="ALL">ALL</option>
             </select>
 
@@ -107,16 +92,28 @@
                 <option value ="ALL">ALL</option>     
             </select>
 
+            <label for="year-select-box">Select year of graduation:</label>
+            <select name="year-select-box" id="year-select-box">
+                <option value ="" disabled>Select a Year</option>
+                <option value ="ALL">ALL</option>     
+            </select>
+
+            <label for="married-select-box">Select if married to other alumns and friends of Oregon Tech:</label>
+            <select name="married-select-box" id="married-select-box">
+                <option value ="" disabled>Select an option</option>
+                <option value ="ALL">ALL</option>     
+            </select>
+
             <div class="filters__container">
-                <h3>Filter Trees by Condition</h3>
+                <h3>Possible selection of college</h3>
                 <form class="filters" name="treeConditionFilter">
                     <label><input type="radio" name="treeCondition" value="" title="No tree condition filter." checked> All<br></label>
-                    <label><input type="radio" name="treeCondition" value="good" title="Filter trees where tree condition is good." disabled> Good<br></label>
-                    <label><input type="radio" name="treeCondition" value="fair" title="Filter trees where tree condition is fair." disabled> Fair<br></label>
-                    <label><input type="radio" name="treeCondition" value="poor" title="Filter trees where tree condition is poor." disabled> Poor<br></label>
-                    <label><input type="radio" name="treeCondition" value="dead" title="Filter trees where tree condition is dead." disabled> Dead<br></label>
+                    <label><input type="radio" name="treeCondition" value="good" title="Filter trees where tree condition is good." disabled> Alumni<br></label>
+                    <label><input type="radio" name="treeCondition" value="fair" title="Filter trees where tree condition is fair." disabled> Alumni Non-Degree<br></label>
+                    <label><input type="radio" name="treeCondition" value="poor" title="Filter trees where tree condition is poor." disabled> Board Member<br></label>
+                    <label><input type="radio" name="treeCondition" value="dead" title="Filter trees where tree condition is dead." disabled> Faculty/Staff<br></label>
                 </form>
-                <h3>Filter Trees by Presence of Wires</h3>
+                <!--<h3>Filter Trees by Presence of Wires</h3>
                     <form class=filters>
                     <label><input id="presence-of-wires-checkbox" type="checkbox" name="wireFilter" value="high voltage" title="Filter trees by presence of high voltage wires." disabled> High Voltage Only<br></label>
                 </form>
@@ -128,7 +125,7 @@
                     <label><input type="radio" name="functionalTypeFilter" value="cd" title="Filter coniferous deciduous tree type." disabled> Coniferous Deciduous (CD)<br></label>
                     <label><input type="radio" name="functionalTypeFilter" value="ce" title="Filter coniferous evergreen tree type." disabled> Coniferous Evergreen (CE)<br></label>
                     <label><input type="radio" name="functionalTypeFilter" value="palm" title="Filter palm tree type." disabled> Palm<br></label>
-                </form>
+                </form>-->
             </div>
     
         </div>
