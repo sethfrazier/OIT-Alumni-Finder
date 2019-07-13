@@ -119,9 +119,9 @@ function getMap(){
             dataType: 'json',
             success: function(response) {
                 if (!response.features.length) {
-                    if (!neighborhood || neighborhood === 'ALL') {
-                        return;
-                    }
+                    //if (!neighborhood || neighborhood === 'ALL') {
+                    //    return;
+                    //}
                     // only trigger feedback if a single neighborhood is selected
                     displayFilterFeedback('0 results for selected filter(s)');
                 }
@@ -274,6 +274,8 @@ function getMap(){
                     //presenceOfWiresCheckBox.disabled=true;
 
                     // set display text of selected neighborhood in info panel heading
+                    selectNeighborhood = $("#neighborhood-select-box option:selected").text();
+                    console.log(selectedNeighborhood +' in select box');
                     $neighborhoodDisplayText.text('All Alumni');
                 } else {
                     //enable radio buttons
@@ -287,6 +289,7 @@ function getMap(){
                     //presenceOfWiresCheckBox.disabled = false;
 
                     // set display text of selected neighborhood in info panel heading
+                    console.log(selectedNeighborhood +' in select box1');
                     $neighborhoodDisplayText.text(selectedNeighborhood);
                 }
 
@@ -313,7 +316,7 @@ function getMap(){
             });
         });
     }
-
+    console.log("line 319 "+selectedNeighborhood);
     function filterAttributes() {
         //if previous marker cluster group exists, remove it
         if (selectedMarkerClusterGroup) {
