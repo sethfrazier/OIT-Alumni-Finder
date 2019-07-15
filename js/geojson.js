@@ -222,13 +222,14 @@ function getMap(){
     getDegreeList();
 
     function getDegreeList(){
-        
-        //lurl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019";
-        //lQurery = "WHERE college ILIKE '" + selectedNeighborhood + "'ORDER BY major ASC";
+        //$('#degree-select-box').empty();
+        lurl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019";
+        lQurery = " WHERE college ILIKE '" + selectedNeighborhood + "' ORDER BY major ASC";
 
-        console.log(selectedNeighborhood);
+        console.log(lurl+lQurery);
+        //"https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019 WHERE college ILIKE '"+selectedNeighborhood+"' ORDER BY major ASC"
 
-        $.getJSON("https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019 WHERE college ILIKE 'college of HAS' ORDER BY major ASC" , function(data) {
+        $.getJSON(lurl+lQurery, function(data) {
             $.each(data.rows, function(key, val) {
                 if (val.college !== '') {
                     $degreeSelectBox.append($('<option/>', {
@@ -237,7 +238,9 @@ function getMap(){
                     }));
                 }
             });
-        });    
+        }); 
+        
+        //$('#degree-select-box').empty();
     }
     
     schoolVal = $neighborhoodSelectBox.text;
@@ -301,9 +304,13 @@ function getMap(){
                 if (selectedNeighborhood === 'ALL') {
                     // zoom out to city 
                     myMap.setView(pdxCenterCoords, defaultZoom);
+                    $('#degree-select-box').empty();
+                    getDegreeList
                     //updateChart(allNbhdData);
                     //updateLegend(allNbhdData);
                 } else {
+                    $('#degree-select-box').empty();
+                    getDegreeList();
                     var selectedNeighborhoodBounds = allBounds[selectedNeighborhood];
                     var selectedNeighborhoodTreeCondition = allConditions[selectedNeighborhood];
                     //myMap.fitBounds(selectedNeighborhoodBounds);
