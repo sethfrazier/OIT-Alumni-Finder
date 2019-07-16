@@ -24,6 +24,7 @@ function getMap(){
     var selectedTreeCondition = '';
     var selectedPresenceOfWires = '';
     var selectedFunctionalType = '';
+    var selectedDegree = '';
 
     var allNbhdData = [{
         condition: 'Good',      //Total values of each class of tree
@@ -113,8 +114,9 @@ function getMap(){
         });
     }
 
-    function getData(map, neighborhood) {
-        var ajaxCall = createAjaxCall(neighborhood);
+    function getData(map, neighborhood, degree) {
+        var ajaxCall = createAjaxCall(neighborhood, degree);
+        console.log("in getDataFunction: "+ajaxCall)
         $.ajax(ajaxCall, {
             dataType: 'json',
             success: function(response) {
@@ -149,87 +151,24 @@ function getMap(){
         });
     }
     
-   /* //load the neighborhoods geojson data
-    function getNeighborhoodPoly(map){
-        $.ajax("data/Neighborhood_Boundaries.geojson", {
-            dataType:"json",
-            success: function(response){
-                var neighborOptions = {
-                    fillColor:'#ffffff',
-                    fillOpacity: 0,
-                    color: '#cc9c33',
-                    opacity:0.8,
-                };
-
-                L.geoJson(response,{
-                    style: neighborOptions,
-                    onEachFeature: onEachFeature
-                }).addTo(map);
-
-                function onEachFeature(feature, layer) {
-                    var neighborhoodName = feature.properties.NAME;
-                    layer.bindTooltip(neighborhoodName, {sticky: true, direction: 'bottom'});
-                    // populate the pseudo-global objects declared at the top of this file
-                    // on order to hold values so that the dropdown can access them
-                    allBounds[neighborhoodName] = layer.getBounds();
-                    allConditions[neighborhoodName] = [{
-                        condition: 'Good',
-                        value: feature.properties.pct_Good.toFixed(2)
-                    },{
-                        condition: 'Fair',
-                        value: feature.properties.pct_Fair.toFixed(2)
-                    },{
-                        condition: 'Poor',
-                        value: feature.properties.pct_Poor.toFixed(2)
-                    },{
-                        condition: 'Dead',
-                        value: feature.properties.pct_Dead.toFixed(2)
-                    }];
-
-                    layer.on({
-                        click: function(e) {
-                            // only select and pan/zoom if selecting a different neighborhood
-                            if ((feature.properties.TreeTotal > 0) && (selectedNeighborhood !== neighborhoodName)) {
-                                // update pseudo-global 'selectedNeighborhood'
-                                selectedNeighborhood = neighborhoodName;
-                                // trigger change event on the neighborhood dropdown
-                                // so that it always is in sync with the selected neighborhood
-                                $neighborhoodSelectBox.val(neighborhoodName).change();
-                            } else if (feature.properties.TreeTotal === 0) {
-                                var feedbackMessage = 'No street trees have been inventoried for ' + neighborhoodName + '.';
-                                displayFilterFeedback(feedbackMessage);                                
-                            }
-                            // tooltip should remain closed on click
-                            layer.closeTooltip();
-                        },
-                        mouseover: function(e) {
-                            // tooltip should remain closed if the neighborhood has already been selected
-                            if (neighborhoodName == selectedNeighborhood){
-                                layer.closeTooltip();
-                            } else {
-                                layer.openTooltip();
-                            }
-                        },
-                        mouseout: function(e) {
-                            layer.closeTooltip();
-                        }
-                    });
-                } 
-            }
-        });
-    }*/
+   
 
     getDegreeList();
 
     function getDegreeList(){
-        //$('#degree-select-box').empty();
-        lurl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019";
-        lQurery = " WHERE college ILIKE '" + selectedNeighborhood + "' ORDER BY major ASC";
+        if (selectedNeighborhood === 'ALL'){
+            lUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019";
+            lQurery = " ORDER BY major ASC";
+        } else if(selectedNeighborhood!=="ALL"){
+            //$('#degree-select-box').empty();
+            lUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019";
+            lQurery = " WHERE college ILIKE '" + selectedNeighborhood + "' ORDER BY major ASC";
+        }
 
-        console.log(lurl+lQurery);
+        console.log(lUrl+lQurery);
         //"https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019 WHERE college ILIKE '"+selectedNeighborhood+"' ORDER BY major ASC"
 
-        $.getJSON(lurl+lQurery, function(data) {
+        $.getJSON(lUrl+lQurery, function(data) {
             $.each(data.rows, function(key, val) {
                 if (val.college !== '') {
                     $degreeSelectBox.append($('<option/>', {
@@ -238,6 +177,51 @@ function getMap(){
                     }));
                 }
             });
+
+            $degreeSelectBox.on('change', function() {
+                selectedDegree = this.value;
+                if (selectedDegree === 'ALL' || selectedDegree === false) {
+
+                    // set display text of selected neighborhood in info panel heading
+                    selectNeighborhood = $("#degree-select-box option:selected").text();
+                    console.log(selectedDegree +' in select degree box');
+                    $neighborhoodDisplayText.text('All Degrees');
+                } else {
+
+                    // set display text of selected neighborhood in info panel heading
+                    console.log(selectedDegree +' in select box1');
+                    $neighborhoodDisplayText.text(selectedDegree);
+                }
+
+                //if previous marker cluster group exists, remove it
+                if (selectedMarkerClusterGroup) {
+                    myMap.removeLayer(selectedMarkerClusterGroup);
+                } 
+
+                //if previous marker cluster group exists, remove it
+                if (selectedMarkerClusterGroup) {
+                    myMap.removeLayer(selectedMarkerClusterGroup);
+                } 
+                
+                if (selectedDegree === 'ALL') {
+                    // zoom out to city 
+                    //myMap.setView(pdxCenterCoords, defaultZoom);
+                    //$('#degree-select-box').empty();
+                    //getDegreeList();
+                    //updateChart(allNbhdData);
+                    //updateLegend(allNbhdData);
+                } else {
+                    //$('#degree-select-box').empty();
+                    //getDegreeList();
+                    //var selectedNeighborhoodBounds = allBounds[selectedNeighborhood];
+                    //var selectedNeighborhoodTreeCondition = allConditions[selectedNeighborhood];
+                    //myMap.fitBounds(selectedNeighborhoodBounds);
+                    //updateChart(selectedNeighborhoodTreeCondition);
+                    //updateLegend(selectedNeighborhoodTreeCondition);
+                }
+
+                getData(selectedDegree);
+            })
         }); 
         
         //$('#degree-select-box').empty();
@@ -277,6 +261,7 @@ function getMap(){
                     //presenceOfWiresCheckBox.disabled=true;
 
                     // set display text of selected neighborhood in info panel heading
+                    //getDegreeList();
                     selectNeighborhood = $("#neighborhood-select-box option:selected").text();
                     console.log(selectedNeighborhood +' in select box');
                     $neighborhoodDisplayText.text('All Alumni');
@@ -305,7 +290,7 @@ function getMap(){
                     // zoom out to city 
                     myMap.setView(pdxCenterCoords, defaultZoom);
                     $('#degree-select-box').empty();
-                    getDegreeList
+                    getDegreeList();
                     //updateChart(allNbhdData);
                     //updateLegend(allNbhdData);
                 } else {
@@ -376,35 +361,12 @@ function getMap(){
         return popupContent;
     }
 
-    function convertTreeTypeToText(treeType) {
-        var fullText = '';
-        switch(treeType.toUpperCase()) {
-            case 'BD':
-            fullText = 'Broadleaf Deciduous';
-                break;
-            case 'BE':
-            fullText = 'Broadleaf Evergreen';
-                break;
-            case 'CD':
-            fullText = 'Coniferous Deciduous';
-                break;
-            case 'CE':
-            fullText = 'Coniferous Evergreen';
-                break;    
-            case 'PALM':
-            fullText = 'Palm';
-                break;      
-            default:
-            fullText = 'Unknown';
-        }
-        return fullText;
-    }
 
     function createPopupAttributeText(labelName, propValue) {
         return "<div class='popupAttributes'><span class='labelName'>" + labelName + "</span> " + propValue + "</div>";
     }
 
-    function createAjaxCall(neighborhood) {
+    function createAjaxCall(neighborhood, selectedDegree) {
         if (neighborhood === "SULLIVAN'S GULCH") {
             // the correct way to escape a SQL apostrophe or single quote 
             // is with two single quotes
@@ -418,6 +380,18 @@ function getMap(){
             var url = "https://sfrazier.carto.com/api/v2/sql?format=GeoJSON&q=";
             var query = "SELECT * FROM alumnibyzip2019 WHERE college ILIKE '" + neighborhood + "'";
         }
+
+         //if (selectedDegree==="ALL"){
+            //var url = "https://sfrazier.carto.com/api/v2/sql/?format=GeoJSON&q=";
+            //query += "WHERE major ILIKE '" +selectedDegree+"'";
+        //} else 
+        
+        if(selectedDegree!=="ALL"){
+            //var url = "https://sfrazier.carto.com/api/v2/sql?format=GeoJSON&q=";
+            query += "AND major ILIKE '" + selectedDegree + "'";
+        }
+
+        console.log("createajaxCall degree: "+ selectedDegree);
         
         if (selectedTreeCondition) {
             query += "AND lower(condition) = '" + selectedTreeCondition + "'";
@@ -439,105 +413,7 @@ function getMap(){
         $filterFeedback.text('');
         $filterFeedback.fadeIn('slow').text(feedbackText);
     }
-    function getFillColor(conditionProperty) {
-        switch (conditionProperty.toLowerCase()) {
-            case 'good':
-                return '#006624';
-            case 'fair':
-                return '#66bd63';
-            case 'poor':
-                return '#82551B';
-            case 'dead':
-                return '#34220B';
-            default:
-                return 'white';                
-        }
-    }
-
-    /*function updateLegend(neighborhoodValues) {
-        $('#percent-good').html(neighborhoodValues[0].value);
-        $('#percent-fair').html(neighborhoodValues[1].value);
-        $('#percent-poor').html(neighborhoodValues[2].value);
-        $('#percent-dead').html(neighborhoodValues[3].value);
-    }*/
-
-    /*function setChart(data) {
-        var chartWidth = 280,
-        chartHeight = 240,
-        radius = Math.min(chartWidth, chartHeight)/2;
     
-        var arc = d3.arc()
-            .outerRadius(radius -10)
-            .innerRadius(radius -70);
-    
-        var labelArc = d3.arc()
-            .outerRadius(radius - 40)
-            .innerRadius(radius - 40);
-    
-        var pie = d3.pie()
-            .sort(null)
-            .value(function(d){
-                return d.value;
-            });
-        
-        var chart = d3.select(".chart-container")
-            .append("svg")
-            .attr("width", chartWidth)
-            .attr("height", chartHeight)
-            .attr("class", "chart")
-            .append("g")
-            .attr("class", "chart-center")
-            .attr("transform", "translate(" + chartWidth / 2 + "," + chartHeight / 2 + ")");
-    
-        var g = chart.selectAll(".arc")
-            .data(pie(data))
-            .enter().append("g")
-            .attr("class", "arc");
-    
-        g.append("path")
-            .attr("d", arc)
-            .style("fill", function(d) { 
-            return getFillColor(d.data.condition); 
-        });   
-    }*/
-
-    /*function updateChart(data) {
-       // TODO(): refactor this so there is less duplicative code between this function and the setChart function
-        var chartWidth = 280,
-        chartHeight = 240,
-        radius = Math.min(chartWidth, chartHeight)/2;
-    
-        var arc = d3.arc()
-            .outerRadius(radius -10)
-            .innerRadius(radius -70);
-    
-        var labelArc = d3.arc()
-            .outerRadius(radius - 40)
-            .innerRadius(radius - 40);
-    
-        var pie = d3.pie()
-            .sort(null)
-            .value(function(d){
-                return d.value;
-            });
-
-        var arcs = d3.selectAll(".arc")
-            .remove()
-            .exit();
-
-        var chartCenter = d3.selectAll(".chart-center");    
-        
-        var g = chartCenter.selectAll(".arc")
-            .data(pie(data))
-            .enter().append("g")
-            .attr("class", "arc");
-
-        g.append("path")
-            .attr("d", arc)
-            .style("fill", function(d) { 
-            return getFillColor(d.data.condition); 
-        });        
-    }*/
 }
 
 $(document).ready(getMap);
