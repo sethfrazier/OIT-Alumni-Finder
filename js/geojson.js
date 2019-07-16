@@ -234,7 +234,7 @@ function getMap() {
           //updateLegend(selectedNeighborhoodTreeCondition);
         }
 
-        getData(selectedDegree);
+        getData(myMap, selectedNeighborhood, selectedDegree);
       });
     });
 
@@ -404,11 +404,14 @@ function getMap() {
       // is with two single quotes
       neighborhood = "SULLIVAN''S GULCH";
     }
+    // add a boolean to keep track of whether a Where exists.
+    var where = false;
 
     if (neighborhood === "ALL" || neighborhood == false) {
       var url = "https://sfrazier.carto.com/api/v2/sql/?format=GeoJSON&q=";
       var query = "SELECT * FROM alumnibyzip2019";
     } else if (neighborhood !== "ALL") {
+      where = true;
       var url = "https://sfrazier.carto.com/api/v2/sql?format=GeoJSON&q=";
       var query =
         "SELECT * FROM alumnibyzip2019 WHERE college ILIKE '" +
@@ -422,8 +425,12 @@ function getMap() {
     //} else
     if (selectedDegree) {
       if (selectedDegree !== "ALL") {
-        //var url = "https://sfrazier.carto.com/api/v2/sql?format=GeoJSON&q=";
-        query += "AND major ILIKE '" + selectedDegree + "'";
+        if (where) {
+          //var url = "https://sfrazier.carto.com/api/v2/sql?format=GeoJSON&q=";
+          query += "AND major ILIKE '" + selectedDegree + "'";
+        } else {
+          query += " WHERE major ILIKE '" + selectedDegree + "'";
+        }
       }
 
       console.log("createajaxCall degree: " + selectedDegree);
