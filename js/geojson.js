@@ -139,6 +139,16 @@ function getMap() {
           displayFilterFeedback("0 results for selected filter(s)");
         }
 
+        //if previous marker cluster group exists, remove it
+        if (selectedMarkerClusterGroup) {
+          myMap.removeLayer(selectedMarkerClusterGroup);
+        }
+
+        //if previous marker cluster group exists, remove it
+        if (selectedMarkerClusterGroup) {
+          myMap.removeLayer(selectedMarkerClusterGroup);
+        }
+
         var geojsonLayer = L.geoJson(response, {
           pointToLayer: pointToLayer
         });
