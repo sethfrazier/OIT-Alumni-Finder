@@ -84,7 +84,7 @@ function getMap() {
   myMap.options.minZoom = 5;
   myMap.options.maxZoom = 18;
 
-  getData(myMap, selectedNeighborhood, selectedDegree);
+  getData(myMap, selectedNeighborhood);
 
   //getNeighborhoodPoly(myMap);
 
@@ -139,8 +139,8 @@ function getMap() {
           displayFilterFeedback("0 results for selected filter(s)");
         }
 
-        //if prevoius marker cluster group exist, remove it.
-         if (selectedMarkerClusterGroup) {
+        //if previous marker cluster group exists, remove it
+        if (selectedMarkerClusterGroup) {
           myMap.removeLayer(selectedMarkerClusterGroup);
         }
 
@@ -211,17 +211,10 @@ function getMap() {
           selectNeighborhood = $("#degree-select-box option:selected").text();
           console.log(selectedDegree + " in select degree box");
           $neighborhoodDisplayText.text("All Degrees");
-          if (selectedMarkerClusterGroup) {
-            myMap.removeLayer(selectedMarkerClusterGroup);
-          }
         } else {
           // set display text of selected neighborhood in info panel heading
           console.log(selectedDegree + " in select box1");
           $neighborhoodDisplayText.text(selectedDegree);
-          //if previous marker cluster group exists, remove it
-          if (selectedMarkerClusterGroup) {
-            myMap.removeLayer(selectedMarkerClusterGroup);
-          }
         }
 
         //if previous marker cluster group exists, remove it
@@ -229,7 +222,12 @@ function getMap() {
           myMap.removeLayer(selectedMarkerClusterGroup);
         }
 
-        /*if (selectedDegree === "ALL") {
+        //if previous marker cluster group exists, remove it
+        if (selectedMarkerClusterGroup) {
+          myMap.removeLayer(selectedMarkerClusterGroup);
+        }
+
+        if (selectedDegree === "ALL") {
           // zoom out to city
           //myMap.setView(pdxCenterCoords, defaultZoom);
           //$('#degree-select-box').empty();
@@ -244,7 +242,7 @@ function getMap() {
           //myMap.fitBounds(selectedNeighborhoodBounds);
           //updateChart(selectedNeighborhoodTreeCondition);
           //updateLegend(selectedNeighborhoodTreeCondition);
-        }*/
+        }
 
         getData(myMap, selectedNeighborhood, selectedDegree);
       });
@@ -350,7 +348,7 @@ function getMap() {
     if (selectedMarkerClusterGroup) {
       myMap.removeLayer(selectedMarkerClusterGroup);
     }
-    getData(myMap, selectedNeighborhood, selectedDegree);
+    getData(myMap, selectedNeighborhood);
   }
 
   function pointToLayer(feature, latlng) {
