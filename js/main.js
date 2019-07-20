@@ -26,6 +26,7 @@ function initialize(){
     });
 
     $filters.click(function() {
+        $overlay.fadeOut('slow');
         $filterFeedback.fadeOut('slow');
     });
 

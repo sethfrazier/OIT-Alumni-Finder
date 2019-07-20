@@ -27,6 +27,7 @@ function getMap() {
   var selectedFunctionalType = "";
   var selectedDegree = "";
   var selectedYear = "";
+  var marriedAlumni = "";
 
   var allNbhdData = [
     {
@@ -53,6 +54,13 @@ function getMap() {
   var allConditions = {};
 
   var treeConditionRadioButtons = document.getElementsByName("treeCondition");
+
+  var marriedAlumniCheckbox = document.getElementById(
+    "alumni-married-alumni-checkbox"
+  );
+
+  console.log(marriedAlumniCheckbox);
+  
   var presenceOfWiresCheckBox = document.getElementById(
     "presence-of-wires-checkbox"
   );
@@ -108,6 +116,19 @@ function getMap() {
     });
   }
 
+  marriedAlumniCheckbox.addEventListener('click', function() {
+    if (marriedAlumniCheckbox.checked) {
+        marriedAlumni = this.value;
+    } else {
+        marriedAlumni = '';
+    }
+    if (selectedNeighborhood.length) {
+        filterAttributes();
+    }
+  });
+
+  console.log('marriedAlumni val: ' +marriedAlumni);
+
   /*presenceOfWiresCheckBox.addEventListener('click', function() {
         if (presenceOfWiresCheckBox.checked) {
             selectedPresenceOfWires = this.value;
@@ -128,8 +149,8 @@ function getMap() {
     });
   }
 
-  function getData(map, neighborhood, degree, year) {
-    var ajaxCall = createAjaxCall(neighborhood, degree, year);
+  function getData(map, neighborhood, degree, year, married) {
+    var ajaxCall = createAjaxCall(neighborhood, degree, year, married);
     console.log("in getDataFunction: " + ajaxCall);
     $.ajax(ajaxCall, {
       dataType: "json",
@@ -209,12 +230,14 @@ function getMap() {
           // set display text of selected neighborhood in info panel heading
           //selectNeighborhood = $("#degree-select-box option:selected").text();
           console.log(selectedDegree + " in select degree box");
+          //document.getElementById("year-select-box").options.length=2;
           $neighborhoodDisplayText.text("All Degrees");
         } else {
           document.getElementById("year-select-box").options.length=2;
           //$('#year-select-box').empty();
           getYearList();
           // set display text of selected neighborhood in info panel heading
+          document.getElementById("year-select-box").options.length=2;
           console.log(selectedDegree + " in select box1");
           $neighborhoodDisplayText.text(selectedDegree);
         }
@@ -246,7 +269,7 @@ function getMap() {
           //updateLegend(selectedNeighborhoodTreeCondition);
         }
 
-        getData(myMap, selectedNeighborhood, selectedDegree, selectedYear);
+        getData(myMap, selectedNeighborhood, selectedDegree);
       });
     });
 
@@ -360,23 +383,28 @@ function getMap() {
   function getYearList() {
 
     if (selectedNeighborhood === "ALL" || selectedNeighborhood === "") {
-      yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
+      if(selectedDegree === "ALL" || selectedDegree === ""){
+        yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
       yQurery = " ORDER BY primarycla ASC";
-    } else if (selectedNeighborhood !== "ALL" && selectedNeighborhood !== "") {
-      /*if(selectedDegree === "ALL" || selectedDegree === ""){
+      }else if(selectedDegree !== "ALL"|| selectedDegree !==""){
+        yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
+        yQurery = " WHERE major ILIKE '" + selectedDegree + "' ORDER BY primarycla ASC";
+      }  
+    } else if (selectedNeighborhood !== "ALL" || selectedNeighborhood !== "") {
+      if(selectedDegree === "ALL" || selectedDegree === ""){
         yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
         yQurery = " WHERE college ILIKE '" + selectedNeighborhood + "' ORDER BY primarycla ASC";
-      }else if( selectedNeighborhood !== "ALL" && selectedDegree !== "ALL"){
+      }else if( selectedDegree !== "ALL"){
         yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
         yQurery = " WHERE college ILIKE '"+ selectedNeighborhood +"' AND major ILIKE '" + selectedDegree +"' ORDER BY primarycla ASC";
-      }*/
+      }
       //$('#degree-select-box').empty();
-      yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
+      /*yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
       yQurery = " WHERE college ILIKE '" + selectedNeighborhood + "' ORDER BY primarycla ASC";
     } else if(selectedDegree !== "ALL"){
       yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
       yQurery = " WHERE college ILIKE '"+ selectedNeighborhood +"' AND major ILIKE '" + selectedDegree +"' ORDER BY primarycla ASC";
-    }
+    */}
 
     console.log("getyearList college: " + selectedNeighborhood);
     console.log("getYearList: "+selectedDegree);
@@ -460,7 +488,7 @@ function getMap() {
     if (selectedMarkerClusterGroup) {
       myMap.removeLayer(selectedMarkerClusterGroup);
     }*/
-    getData(myMap, selectedNeighborhood, selectedDegree, selectedYear);
+    getData(myMap, selectedNeighborhood, selectedDegree, selectedYear, marriedAlumni);
   }
 
   function pointToLayer(feature, latlng) {
@@ -555,6 +583,7 @@ function getMap() {
           query += "AND major ILIKE '" + selectedDegree + "'";
         } else {
           query += " WHERE major ILIKE '" + selectedDegree + "'";
+          where = true;
         }
       }
     }
@@ -584,8 +613,14 @@ function getMap() {
         query += "AND lower(condition) = '" + selectedTreeCondition + "'";
       }
 
+      if (marriedAlumni){
+        query += "AND lower(spousealum) = '" + marriedAlumni +"'";
+      }
+
+      console.log("createajaxCall marriedAlum: " + marriedAlumni);
+
       if (selectedPresenceOfWires) {
-        query += "AND lower(wires) = '" + selectedPresenceOfWires + "'";
+        query += "AND spousealum(wires) = '" + selectedPresenceOfWires + "'";
       }
 
       if (selectedFunctionalType) {
