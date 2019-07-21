@@ -122,9 +122,10 @@ function getMap() {
     } else {
         marriedAlumni = '';
     }
-    if (selectedNeighborhood.length) {
+    /*if (selectedNeighborhood.length) {
         filterAttributes();
-    }
+    }*/
+    getData(myMap, selectedNeighborhood, selectedDegree, selectedYear, marriedAlumni);
   });
 
   console.log('marriedAlumni val: ' +marriedAlumni);
@@ -548,7 +549,7 @@ function getMap() {
     );
   }
 
-  function createAjaxCall(neighborhood, selectedDegree, selectedYear) {
+  function createAjaxCall(neighborhood, selectedDegree, selectedYear, marriedAlumni) {
     
     /*if (neighborhood === "SULLIVAN'S GULCH") {
       // the correct way to escape a SQL apostrophe or single quote
@@ -587,9 +588,7 @@ function getMap() {
         }
       }
     }
-   
-    
-
+  
     if (selectedYear) { 
       if (selectedYear !== "ALL"){
         selectedYear = "'"+selectedYear;
@@ -602,6 +601,7 @@ function getMap() {
           query += "AND primarycla ILIKE '" + selectedYear + "'";
         } else {
           query += " WHERE primarycla ILIKE '" + selectedYear + "'";
+          where = true;
         }
       }
     }
@@ -609,19 +609,24 @@ function getMap() {
 
       console.log("createajaxCall degree: " + selectedDegree);
 
-      if (selectedTreeCondition) {
-        query += "AND lower(condition) = '" + selectedTreeCondition + "'";
-      }
-
       if (marriedAlumni){
-        query += "AND lower(spousealum) = '" + marriedAlumni +"'";
+        if (where){
+          query += " AND lower(spousealum) = '" + marriedAlumni + "'";
+        }else{
+          query += " WHERE lower(spousealum) = '" + marriedAlumni + "'";
+        }
       }
 
       console.log("createajaxCall marriedAlum: " + marriedAlumni);
 
-      if (selectedPresenceOfWires) {
-        query += "AND spousealum(wires) = '" + selectedPresenceOfWires + "'";
-      }
+      /*if (selectedPresenceOfWires) {
+        if (where){
+          query += " AND spousealum(wires) = '" + selectedPresenceOfWires + "'";
+        }else{
+          query += " WHERE spousealum(wires) = '" + selectedPresenceOfWires + "'";
+        }
+        
+      }*/
 
       if (selectedFunctionalType) {
         query += "AND lower(functional) = '" + selectedFunctionalType + "'";
