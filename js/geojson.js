@@ -6,6 +6,7 @@ function getMap() {
   var $neighborhoodSelectBox = $("#neigbhorbood-select-box");
   var $filterFeedback = $("#filter-feedback");
   var $neighborhoodDisplayText = $("#displayed-neighborhood");
+  var $degreeDisplayText = $("#displayed-degree");
   var $degreeSelectBox = $("#degree-select-box");
   var $yearSelectBox = $("#year-select-box");
   var $marriedSelectBox = $("#married-select-box");
@@ -229,18 +230,21 @@ function getMap() {
         selectedDegree = this.value;
         if (selectedDegree === "ALL" || selectedDegree === false) {
           // set display text of selected neighborhood in info panel heading
+          //$('#year-select-box').empty();
           //selectNeighborhood = $("#degree-select-box option:selected").text();
-          console.log(selectedDegree + " in select degree box");
-          //document.getElementById("year-select-box").options.length=2;
-          $neighborhoodDisplayText.text("All Degrees");
-        } else {
+          document.getElementById("year-select-box").options.length=2;
+          //console.log(selectedDegree + " in select degree box");
+          getYearList();
+          $degreeDisplayText.text("All Degrees");
+        } else if (selectedDegree !== "ALL") {
           document.getElementById("year-select-box").options.length=2;
           //$('#year-select-box').empty();
-          getYearList();
+          //getYearList();
           // set display text of selected neighborhood in info panel heading
+          $degreeDisplayText.text(selectedDegree);
           document.getElementById("year-select-box").options.length=2;
           console.log(selectedDegree + " in select box1");
-          $neighborhoodDisplayText.text(selectedDegree);
+          
         }
 
         /*//if previous marker cluster group exists, remove it
@@ -253,7 +257,7 @@ function getMap() {
           myMap.removeLayer(selectedMarkerClusterGroup);
         }*/
 
-        if (selectedDegree === "ALL") {
+        if (selectedDegree === "ALL" ) {
           // zoom out to city
           //myMap.setView(pdxCenterCoords, defaultZoom);
           //$('#degree-select-box').empty();
@@ -318,17 +322,18 @@ function getMap() {
             //presenceOfWiresCheckBox.disabled=true;
 
             // set display text of selected neighborhood in info panel heading
-            //getDegreeList();
             myMap.setView(pdxCenterCoords, defaultZoom);
+            document.getElementById("alumni-married-alumni-checkbox").checked = false;
             document.getElementById("degree-select-box").options.length=2;
             document.getElementById("year-select-box").options.length=2;
             getDegreeList();
             getYearList();
-            selectNeighborhood = $(
-              "#neighborhood-select-box option:selected"
-            ).text();
-            console.log(selectedNeighborhood + " in select box");
+            //selectNeighborhood = $(
+            //  "#neighborhood-select-box option:selected"
+            //).text();
+            //console.log(selectedNeighborhood + " in select box");
             $neighborhoodDisplayText.text("All Alumni");
+            $degreeDisplayText.text("All Degrees");
           } else {
             //enable radio buttons
             //for (var i = 0; i < treeConditionRadioButtons.length;  i++){
@@ -400,9 +405,10 @@ function getMap() {
         yQurery = " WHERE college ILIKE '"+ selectedNeighborhood +"' AND major ILIKE '" + selectedDegree +"' ORDER BY primarycla ASC";
       }
       //$('#degree-select-box').empty();
-      /*yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
-      yQurery = " WHERE college ILIKE '" + selectedNeighborhood + "' ORDER BY primarycla ASC";
-    } else if(selectedDegree !== "ALL"){
+      //yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
+      //yQurery = " WHERE college ILIKE '" + selectedNeighborhood + "' ORDER BY primarycla ASC";
+      //yQurery = " ORDER BY primarycla ASC";
+    /*} else if(selectedDegree !== "ALL"){
       yUrl = "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT primarycla FROM alumnibyzip2019";
       yQurery = " WHERE college ILIKE '"+ selectedNeighborhood +"' AND major ILIKE '" + selectedDegree +"' ORDER BY primarycla ASC";
     */}
@@ -468,7 +474,7 @@ function getMap() {
     });
   }
 
-  getMarriedList();
+  /*getMarriedList();
 
   function getMarriedList() {
     $.getJSON("https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT spousealum FROM alumnibyzip2019 ORDER BY spousealum ASC", function(data) {
@@ -481,7 +487,7 @@ function getMap() {
             }
         });
     });
-  } 
+  } */
 
   console.log("line 319 " + selectedNeighborhood);
   function filterAttributes() {
