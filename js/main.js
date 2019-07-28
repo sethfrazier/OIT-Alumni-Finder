@@ -10,6 +10,9 @@ function initialize(){
     var $neighborhoodSelectBox = $('#neigbhorbood-select-box');
     var $overlayCloseButton = $('#overlay-close-button');
     var $overlay = $('#overlay');
+    var $degreeSelectBox = $("#degree-select-box");
+    var $yearSelectBox = $("#year-select-box");
+    var marriedAlumniCheckbox = $("#alumni-married-alumni-checkbox")
 
     $aboutMenuItem.click(function() {
         $overlay.fadeIn('slow');
@@ -22,10 +25,11 @@ function initialize(){
         } else {
             $infoPanelToggle.html('<i class="fas fa-caret-right fa-1x"></i>');
         }
-
+        
     });
 
     $filters.click(function() {
+        $mainHeaderMenu.fadeOut();
         $overlay.fadeOut('slow');
         $filterFeedback.fadeOut('slow');
     });
@@ -35,11 +39,25 @@ function initialize(){
     });
 
     $map.click(function() {
+        $mainHeaderMenu.fadeOut();
         $overlay.fadeOut('slow');
         $filterFeedback.fadeOut('slow');
     });
 
     $neighborhoodSelectBox.click(function() {
+        $mainHeaderMenu.fadeOut();
+        $overlay.fadeOut('slow');
+        $filterFeedback.fadeOut('slow');
+    });
+
+    $degreeSelectBox.click(function(){
+        $mainHeaderMenu.fadeOut();
+        $overlay.fadeOut('slow');
+        $filterFeedback.fadeOut('slow');
+    });
+
+    $yearSelectBox.click(function(){
+        $mainHeaderMenu.fadeOut();
         $overlay.fadeOut('slow');
         $filterFeedback.fadeOut('slow');
     });

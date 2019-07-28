@@ -163,7 +163,7 @@ select {
     cursor: pointer;
     font-size: 22px;
     height: 25px;
-    margin-left: -16px;
+    margin-left: -15px;
     overflow: visible;
     padding: 5px 8px 5px 5px;
     text-align: right;
@@ -176,7 +176,7 @@ select {
 }
 
 .infoPanel h2 {
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1;
     text-align: center;
     margin-top: 5px;
@@ -248,22 +248,6 @@ input[type=checkbox]:disabled {
     height: 15px;
     margin: 2px 5px -3px 5px;
     width: 15px;
-}
-
-.goodColor {
-    background: #006624;
-}
-
-.fairColor {
-    background: #66bd63;
-}
-
-.poorColor {
-    background: #82551B;
-}
-
-.deadColor {
-    background: #34220B;
 }
 
 .filter-feedback {

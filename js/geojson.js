@@ -9,50 +9,27 @@ function getMap() {
   var $degreeDisplayText = $("#displayed-degree");
   var $degreeSelectBox = $("#degree-select-box");
   var $yearSelectBox = $("#year-select-box");
-  var $marriedSelectBox = $("#married-select-box");
+  var $yearDisplayText = $("#displayed-year");
 
   /* default map values */
-  var pdxCenterCoords = [45.541, -122.6769];
+  var pdxCenterCoords = [52.8, -117.667];
   //var defaultZoom = getZoomValue();
-  var defaultZoom = 6;
+  var defaultZoom = 5;
 
   /*limits to panning*/
-  //var southWest = L.latLng(45.411, -123.00),
-  //northEast = L.latLng(45.67, -122.452);
-  //var bounds = L.latLngBounds(southWest, northEast);
+  var southWest = L.latLng(30.053, -128.5),
+  northEast = L.latLng(49.130, -108.0);
+  var bounds = L.latLngBounds(southWest, northEast);
 
   /* pseudo-globals for map */
   var selectedNeighborhood = "";
-  var selectedTreeCondition = "";
-  var selectedPresenceOfWires = "";
   var selectedFunctionalType = "";
   var selectedDegree = "";
   var selectedYear = "";
   var marriedAlumni = "";
-
-  var allNbhdData = [
-    {
-      condition: "Good", //Total values of each class of tree
-      value: 35.4 //77152
-    },
-    {
-      condition: "Fair",
-      value: 55.33 //120576
-    },
-    {
-      condition: "Poor",
-      value: 8.42 //18346
-    },
-    {
-      condition: "Dead",
-      value: 0.85 //1852
-    }
-  ];
-
+ console.log(selectedNeighborhood);
   /* variables to populate with values from the geojson so they can be easily consumed 
     in other functions */
-  var allBounds = {};
-  var allConditions = {};
 
   var treeConditionRadioButtons = document.getElementsByName("treeCondition");
 
@@ -71,11 +48,11 @@ function getMap() {
 
   /* tile layers */
   var cartoDB = L.tileLayer.provider("CartoDB.Positron");
-  var EsriImgagery = L.tileLayer.provider("Esri.WorldImagery");
+  var EsriStreetMap = L.tileLayer.provider("Esri.WorldStreetMap");
 
   var baseMaps = {
     '<span class="tileLayer__text">Map</span>': cartoDB,
-    '<span class="tileLayer__text">Satellite Imagery</span>': EsriImgagery
+    '<span class="tileLayer__text">Street Map</span>': EsriStreetMap
   };
 
   /* create Leaflet map object */
@@ -85,16 +62,16 @@ function getMap() {
   );
 
   //set bounds and animate the edge of panning area
-  //myMap.setMaxBounds(bounds);
-  //myMap.on('drag', function() {
-  //myMap.panInsideBounds(bounds, { animate: true });
-  //});
+  myMap.setMaxBounds(bounds);
+  myMap.on('drag', function() {
+    myMap.panInsideBounds(bounds, { animate: true });
+  });
 
   L.tileLayer.provider("CartoDB.Positron").addTo(myMap);
   L.control.layers(baseMaps).addTo(myMap);
   myMap.zoomControl.setPosition("bottomright");
   myMap.options.minZoom = 5;
-  myMap.options.maxZoom = 18;
+  myMap.options.maxZoom = 17;
 
   getData(myMap, selectedNeighborhood);
 
@@ -102,9 +79,6 @@ function getMap() {
 
   /* retrieve list of distinct neighborhoods from database and set event listeners on select box */
   getNeighborhoodList();
-
-  //setChart(allNbhdData);
-  //updateLegend(allNbhdData);
 
   /* event listeners for filters */
   for (var i = 0; i < treeConditionRadioButtons.length; i++) {
@@ -120,13 +94,16 @@ function getMap() {
   marriedAlumniCheckbox.addEventListener('click', function() {
     if (marriedAlumniCheckbox.checked) {
         marriedAlumni = this.value;
+        filterAttributes();
     } else {
         marriedAlumni = '';
-    }
-    /*if (selectedNeighborhood.length) {
         filterAttributes();
-    }*/
-    getData(myMap, selectedNeighborhood, selectedDegree, selectedYear, marriedAlumni);
+    }
+    if (selectedNeighborhood.length) {
+        //filterAttributes();
+    }
+    //filterAttributes();
+    //getData(myMap, selectedNeighborhood, selectedDegree, selectedYear, marriedAlumni);
   });
 
   console.log('marriedAlumni val: ' +marriedAlumni);
@@ -181,12 +158,12 @@ function getMap() {
 
         // add new markers
         var markers = L.markerClusterGroup({
-          disableClusteringAtZoom: 18,
+          disableClusteringAtZoom: 15,
           showCoverageOnHover: true,
           zoomToBoundsOnClick: true,
-          spiderfyOnMaxZoom: true,
+          spiderfyOnMaxZoom: false,
           polygonOptions: {
-            color: "#66bd63",
+            color: "#003767",
             weight: 2,
             opacity: 0.9
           }
@@ -198,88 +175,10 @@ function getMap() {
     });
   }
 
+
   getDegreeList();
 
-  function getDegreeList() {
-    if (selectedNeighborhood === "ALL" || selectedNeighborhood === "") {
-      lUrl =
-        "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019";
-      lQurery = " ORDER BY major ASC";
-    } else if (selectedNeighborhood !== "ALL" && selectedNeighborhood !== "") {
-      //$('#degree-select-box').empty();
-      lUrl =
-        "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019";
-      lQurery =" WHERE college ILIKE '" + selectedNeighborhood +"' ORDER BY major ASC";}
-
-    console.log(lUrl + lQurery);
-    //"https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019 WHERE college ILIKE '"+selectedNeighborhood+"' ORDER BY major ASC"
-
-    $.getJSON(lUrl + lQurery, function(data) {
-      $.each(data.rows, function(key, val) {
-        if (val.college !== "") {
-          $degreeSelectBox.append(
-            $("<option/>", {
-              value: val.major,
-              text: val.major
-            })
-          );
-        }
-      });
-
-      $degreeSelectBox.on("change", function() {
-        selectedDegree = this.value;
-        if (selectedDegree === "ALL" || selectedDegree === false) {
-          // set display text of selected neighborhood in info panel heading
-          //$('#year-select-box').empty();
-          //selectNeighborhood = $("#degree-select-box option:selected").text();
-          document.getElementById("year-select-box").options.length=2;
-          //console.log(selectedDegree + " in select degree box");
-          getYearList();
-          $degreeDisplayText.text("All Degrees");
-        } else if (selectedDegree !== "ALL") {
-          document.getElementById("year-select-box").options.length=2;
-          //$('#year-select-box').empty();
-          //getYearList();
-          // set display text of selected neighborhood in info panel heading
-          $degreeDisplayText.text(selectedDegree);
-          document.getElementById("year-select-box").options.length=2;
-          console.log(selectedDegree + " in select box1");
-          
-        }
-
-        /*//if previous marker cluster group exists, remove it
-        if (selectedMarkerClusterGroup) {
-          myMap.removeLayer(selectedMarkerClusterGroup);
-        }
-
-        //if previous marker cluster group exists, remove it
-        if (selectedMarkerClusterGroup) {
-          myMap.removeLayer(selectedMarkerClusterGroup);
-        }*/
-
-        if (selectedDegree === "ALL" ) {
-          // zoom out to city
-          //myMap.setView(pdxCenterCoords, defaultZoom);
-          //$('#degree-select-box').empty();
-          //getDegreeList();
-          //updateChart(allNbhdData);
-          //updateLegend(allNbhdData);
-        } else {
-          //$('#degree-select-box').empty();
-          //getDegreeList();
-          //var selectedNeighborhoodBounds = allBounds[selectedNeighborhood];
-          //var selectedNeighborhoodTreeCondition = allConditions[selectedNeighborhood];
-          //myMap.fitBounds(selectedNeighborhoodBounds);
-          //updateChart(selectedNeighborhoodTreeCondition);
-          //updateLegend(selectedNeighborhoodTreeCondition);
-        }
-
-        getData(myMap, selectedNeighborhood, selectedDegree);
-      });
-    });
-
-    //$('#degree-select-box').empty();
-  }
+  
 
   schoolVal = $neighborhoodSelectBox.text;
   console.log("outside " + schoolVal);
@@ -299,90 +198,159 @@ function getMap() {
           }
         });
 
-        // set event listener on neighborhood select box
-        $neighborhoodSelectBox.on("change", function() {
-          selectedNeighborhood = this.value;
-          if (
-            selectedNeighborhood === "ALL" ||
-            selectedNeighborhood === false
-          ) {
-            // disable all filters and clear filter values
-            //selectedTreeCondition = '';
-            //treeConditionRadioButtons[0].checked=true;
-            //for (var i = 0; i < treeConditionRadioButtons.length;  i++){
-            //treeConditionRadioButtons[i].disabled = true;
-            //}
-            //selectedFunctionalType = '';
-            //functionalTypeRadioButtons[0].checked=true;
-            //for (var i = 0; i < functionalTypeRadioButtons.length;  i++){
-            //functionalTypeRadioButtons[i].disabled = true;
-            //}
-            //selectedPresenceOfWires = '';
-            //presenceOfWiresCheckBox.checked=false;
-            //presenceOfWiresCheckBox.disabled=true;
 
-            // set display text of selected neighborhood in info panel heading
-            myMap.setView(pdxCenterCoords, defaultZoom);
-            document.getElementById("alumni-married-alumni-checkbox").checked = false;
-            document.getElementById("degree-select-box").options.length=2;
-            document.getElementById("year-select-box").options.length=2;
-            getDegreeList();
-            getYearList();
-            //selectNeighborhood = $(
-            //  "#neighborhood-select-box option:selected"
-            //).text();
-            //console.log(selectedNeighborhood + " in select box");
-            $neighborhoodDisplayText.text("All Alumni");
-            $degreeDisplayText.text("All Degrees");
-          } else {
-            //enable radio buttons
-            //for (var i = 0; i < treeConditionRadioButtons.length;  i++){
-            // treeConditionRadioButtons[i].disabled = false;
-            //}
-            //for (var i = 0; i < functionalTypeRadioButtons.length;  i++){
-            //    functionalTypeRadioButtons[i].disabled = false;
-            //}
-            // enable checkbox
-            //presenceOfWiresCheckBox.disabled = false;
-
-
-            document.getElementById("year-select-box").options.length=2;
-            document.getElementById("degree-select-box").options.length=2;
-            getDegreeList();
-            getYearList();
-            // set display text of selected neighborhood in info panel heading
-            console.log(selectedNeighborhood + " in select box1");
-            $neighborhoodDisplayText.text(selectedNeighborhood);
-          }
-
-          /*//if previous marker cluster group exists, remove it
-          if (selectedMarkerClusterGroup) {
-            myMap.removeLayer(selectedMarkerClusterGroup);
-          }*/
-
-          /*if (selectedNeighborhood === "ALL") {
-            // zoom out to city
-            myMap.setView(pdxCenterCoords, defaultZoom);
-            document.getElementById("degree-select-box").options.length=0;
-            getDegreeList();
-            //updateChart(allNbhdData);
-            //updateLegend(allNbhdData);
-          } else {
-            document.getElementById("degree-select-box").options.length=0;
-            getDegreeList();
-            var selectedNeighborhoodBounds = allBounds[selectedNeighborhood];
-            var selectedNeighborhoodTreeCondition =
-              allConditions[selectedNeighborhood];
-            //myMap.fitBounds(selectedNeighborhoodBounds);
-            //updateChart(selectedNeighborhoodTreeCondition);
-            //updateLegend(selectedNeighborhoodTreeCondition);
-          }*/
-
-          getData(myMap, selectedNeighborhood);
-        });
       }
     );
   }
+  
+  // set event listener on neighborhood select box
+  $neighborhoodSelectBox.on("change", function() {
+    selectedNeighborhood = this.value;
+    if (selectedNeighborhood === "ALL" || selectedNeighborhood === false) {
+        //clear filter values
+        
+        selectedDegree = '';
+        selectedYear = '';
+        marriedAlumni = '';
+        // set display text of selected neighborhood in info panel heading
+        myMap.setView(pdxCenterCoords, defaultZoom);
+        document.getElementById("alumni-married-alumni-checkbox").checked = false;
+        document.getElementById("degree-select-box").options.length=2;
+        document.getElementById("year-select-box").options.length=2;
+        getDegreeList();
+        getYearList();
+        //selectNeighborhood = $(
+        //  "#neighborhood-select-box option:selected"
+        //).text();
+        //console.log(selectedNeighborhood + " in select box");
+        $neighborhoodDisplayText.text("All Alumni");
+        $degreeDisplayText.text("All Degrees");
+        $yearDisplayText.text("All Years");
+      } else if (selectedNeighborhood !== "ALL"){
+  
+        selectedDegree = '';
+        selectedYear = '';
+        document.getElementById("year-select-box").options.length=2;
+        document.getElementById("degree-select-box").options.length=2;
+        getDegreeList();
+        getYearList();
+        // set display text of selected neighborhood in info panel heading
+        console.log(selectedNeighborhood + " in select box1");
+        $neighborhoodDisplayText.text(selectedNeighborhood);
+      }
+  
+      /*//if previous marker cluster group exists, remove it
+        if (selectedMarkerClusterGroup) {
+        myMap.removeLayer(selectedMarkerClusterGroup);
+      }*/
+  
+            /*if (selectedNeighborhood === "ALL") {
+              // zoom out to city
+              myMap.setView(pdxCenterCoords, defaultZoom);
+              document.getElementById("degree-select-box").options.length=0;
+              getDegreeList();
+              //updateChart(allNbhdData);
+              //updateLegend(allNbhdData);
+            } else {
+              document.getElementById("degree-select-box").options.length=0;
+              getDegreeList();
+              var selectedNeighborhoodBounds = allBounds[selectedNeighborhood];
+              var selectedNeighborhoodTreeCondition =
+                allConditions[selectedNeighborhood];
+              //myMap.fitBounds(selectedNeighborhoodBounds);
+              //updateChart(selectedNeighborhoodTreeCondition);
+              //updateLegend(selectedNeighborhoodTreeCondition);
+            }*/
+            //createAjaxCall(selectedNeighborhood);
+            //getData(myMap, selectedNeighborhood);
+            filterAttributes();
+          });
+
+  function getDegreeList() {
+    if (selectedNeighborhood === "ALL" || selectedNeighborhood === "") {
+      lUrl =
+        "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019";
+      lQurery = " ORDER BY major ASC";
+    } else if (selectedNeighborhood !== "ALL" || selectedNeighborhood !== "") {
+      //$('#degree-select-box').empty();
+      lUrl =
+        "https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019";
+      lQurery =" WHERE college ILIKE '" + selectedNeighborhood +"' ORDER BY major ASC";}
+
+    console.log(lUrl + lQurery);
+    //"https://sfrazier.carto.com/api/v2/sql/?q=SELECT DISTINCT major FROM alumnibyzip2019 WHERE college ILIKE '"+selectedNeighborhood+"' ORDER BY major ASC"
+
+    $.getJSON(lUrl + lQurery, function(data) {
+      $.each(data.rows, function(key, val) {
+        if (val.college !== "") {
+          $degreeSelectBox.append(
+            $("<option/>", {
+              value: val.major,
+              text: val.major
+            })
+          );
+        }
+      });
+    });
+
+    //$('#degree-select-box').empty();
+  }
+
+  $degreeSelectBox.on("change", function() {
+    selectedDegree = this.value;
+    if (selectedDegree === "ALL" || selectedDegree === false) {
+      // set display text of selected neighborhood in info panel heading
+      //$('#year-select-box').empty();
+      //selectNeighborhood = $("#degree-select-box option:selected").text();
+      selectedDegree = '';
+      selectedYear = '';
+      marriedAlumni = '';
+      document.getElementById("year-select-box").options.length=2;
+      document.getElementById("alumni-married-alumni-checkbox").checked = false;
+      //console.log(selectedDegree + " in select degree box");
+      getYearList();
+      $degreeDisplayText.text("All Degrees");
+    } else if (selectedDegree !== "ALL") {
+      document.getElementById("year-select-box").options.length=2;
+      //$('#year-select-box').empty();
+      selectedYear = '';
+      getYearList();
+      // set display text of selected neighborhood in info panel heading
+      $degreeDisplayText.text(selectedDegree);
+      document.getElementById("year-select-box").options.length=2;
+      console.log(selectedDegree + " in select box1");
+      
+    }
+
+    /*//if previous marker cluster group exists, remove it
+    if (selectedMarkerClusterGroup) {
+      myMap.removeLayer(selectedMarkerClusterGroup);
+    }
+
+    //if previous marker cluster group exists, remove it
+    if (selectedMarkerClusterGroup) {
+      myMap.removeLayer(selectedMarkerClusterGroup);
+    }*/
+
+    if (selectedDegree === "ALL" ) {
+      // zoom out to city
+      //myMap.setView(pdxCenterCoords, defaultZoom);
+      //$('#degree-select-box').empty();
+      //getDegreeList();
+      //updateChart(allNbhdData);
+      //updateLegend(allNbhdData);
+    } else {
+      //$('#degree-select-box').empty();
+      //getDegreeList();
+      //var selectedNeighborhoodBounds = allBounds[selectedNeighborhood];
+      //var selectedNeighborhoodTreeCondition = allConditions[selectedNeighborhood];
+      //myMap.fitBounds(selectedNeighborhoodBounds);
+      //updateChart(selectedNeighborhoodTreeCondition);
+      //updateLegend(selectedNeighborhoodTreeCondition);
+    }
+    filterAttributes();
+    //getData(myMap);
+  });
 
   getYearList();
 
@@ -426,53 +394,54 @@ function getMap() {
                 }));
             }
           });
-
-        $yearSelectBox.on("change", function() {
-          selectedYear = this.value;
-          if (selectedYear === "ALL" || selectedYear === false) {
-            // set display text of selected neighborhood in info panel heading
-            //selectNeighborhood = $("#degree-select-box option:selected").text();
-            console.log(selectedDegree + " in select degree box");
-            $neighborhoodDisplayText.text("All years");
-          } else {
-            //document.getElementById("year-select-box").options.length=2;
-            //$('#year-select-box').empty();
-            //getYearList();
-            // set display text of selected neighborhood in info panel heading
-            console.log(selectedDegree + " in select box1");
-            $neighborhoodDisplayText.text(selectedYear);
-          }
-  
-          /*//if previous marker cluster group exists, remove it
-          if (selectedMarkerClusterGroup) {
-            myMap.removeLayer(selectedMarkerClusterGroup);
-          }
-  
-          //if previous marker cluster group exists, remove it
-          if (selectedMarkerClusterGroup) {
-            myMap.removeLayer(selectedMarkerClusterGroup);
-          }*/
-  
-          if (selectedDegree === "ALL") {
-            // zoom out to city
-            //myMap.setView(pdxCenterCoords, defaultZoom);
-            //$('#degree-select-box').empty();
-            //getDegreeList();
-            //updateChart(allNbhdData);
-            //updateLegend(allNbhdData);
-          } else {
-            //$('#degree-select-box').empty();
-            //getDegreeList();
-            //var selectedNeighborhoodBounds = allBounds[selectedNeighborhood];
-            //var selectedNeighborhoodTreeCondition = allConditions[selectedNeighborhood];
-            //myMap.fitBounds(selectedNeighborhoodBounds);
-            //updateChart(selectedNeighborhoodTreeCondition);
-            //updateLegend(selectedNeighborhoodTreeCondition);
-          }
-          getData(myMap, selectedNeighborhood, selectedDegree, selectedYear);
-      });
     });
   }
+
+  $yearSelectBox.on("change", function() {
+    selectedYear = this.value;
+    if (selectedYear === "ALL" || selectedYear === false) {
+      // set display text of selected neighborhood in info panel heading
+      //selectNeighborhood = $("#degree-select-box option:selected").text();
+      console.log(selectedDegree + " in select degree box");
+      $yearDisplayText.text("All years");
+    } else {
+      //document.getElementById("year-select-box").options.length=2;
+      //$('#year-select-box').empty();
+      //getYearList();
+      // set display text of selected neighborhood in info panel heading
+      console.log(selectedDegree + " in select box1");
+      $yearDisplayText.text(selectedYear);
+    }
+
+    /*//if previous marker cluster group exists, remove it
+    if (selectedMarkerClusterGroup) {
+      myMap.removeLayer(selectedMarkerClusterGroup);
+    }
+
+    //if previous marker cluster group exists, remove it
+    if (selectedMarkerClusterGroup) {
+      myMap.removeLayer(selectedMarkerClusterGroup);
+    }*/
+
+    if (selectedDegree === "ALL") {
+      // zoom out to city
+      //myMap.setView(pdxCenterCoords, defaultZoom);
+      //$('#degree-select-box').empty();
+      //getDegreeList();
+      //updateChart(allNbhdData);
+      //updateLegend(allNbhdData);
+    } else {
+      //$('#degree-select-box').empty();
+      //getDegreeList();
+      //var selectedNeighborhoodBounds = allBounds[selectedNeighborhood];
+      //var selectedNeighborhoodTreeCondition = allConditions[selectedNeighborhood];
+      //myMap.fitBounds(selectedNeighborhoodBounds);
+      //updateChart(selectedNeighborhoodTreeCondition);
+      //updateLegend(selectedNeighborhoodTreeCondition);
+    }
+    //getData(myMap, selectedNeighborhood, selectedDegree, selectedYear);
+    filterAttributes();
+  });
 
   /*getMarriedList();
 
@@ -491,8 +460,8 @@ function getMap() {
 
   console.log("line 319 " + selectedNeighborhood);
   function filterAttributes() {
-    /*//if previous marker cluster group exists, remove it
-    if (selectedMarkerClusterGroup) {
+    //if previous marker cluster group exists, remove it
+    /*if (selectedMarkerClusterGroup) {
       myMap.removeLayer(selectedMarkerClusterGroup);
     }*/
     getData(myMap, selectedNeighborhood, selectedDegree, selectedYear, marriedAlumni);
@@ -529,18 +498,15 @@ function getMap() {
 
   function createPopupContent(props) {
     //reformat text for No HV wire prop to more user-friendly text
-    var wiresProps = props.wires === "No HV" ? "No high voltage" : props.wires;
 
-    var popupTitle = "<h1>" + props.major.toUpperCase() + "</h1>";
-    var treeScientificName = createPopupAttributeText(
-      "Scientific Name: ",
-      props.scientific
-    );
-    var treeAddress = createPopupAttributeText("Address: ", props.address);
+    var popupTitle = "<h1>" + props.city_1.toUpperCase() + "</h1>";
+    var treeScientificName = createPopupAttributeText("Postal Code: ", props.postal);
+    var treeAddress = createPopupAttributeText("Region: ", props.defined_re);
     //var treeCondition = createPopupAttributeText("Tree Condition: ", props.condition);
+    //var wiresPresent = createPopupAttributeText(myMap.getCenter());
     //var wiresPresent = createPopupAttributeText("Wires Present: ", wiresProps);
     //var functionalType = createPopupAttributeText("Functional Type: ", convertTreeTypeToText(props.functional));
-    var popupContent = popupTitle + "<hr>" + treeAddress + treeScientificName; //+ treeCondition + wiresPresent + functionalType;
+    var popupContent = popupTitle + "<hr>"+ treeScientificName + treeAddress ;// + treeCondition + wiresPresent;
 
     return popupContent;
   }
@@ -634,11 +600,14 @@ function getMap() {
         
       }*/
 
-      if (selectedFunctionalType) {
+      /*if (selectedFunctionalType) {
         query += "AND lower(functional) = '" + selectedFunctionalType + "'";
-      }
+      }*/
+
+      
     
     var ajaxString = url + query;
+    console.log("create Ajax call:" +ajaxString)
     return ajaxString;
   }
 

@@ -2,12 +2,83 @@
 This stylesheet is for all styles specific to the map itself (popups, zoom controls, etc.).
 */
 
+.popupAttributes .labelName {
+    color: black;
+    font-weight: bold;
+    margin-right: 6px;
+}
+
+.popupAttributes {
+    font: 14px "Libre Franklin", 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.leaflet-popup,
+.leaflet-popup-content {
+    width: 285px;
+}
+
+.leaflet-popup h1 {
+    color: #003767;
+    font: 18px "Libre Franklin", 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    line-height: .8;
+}
+
+.leaflet-popup hr {
+    width: 80%;
+}
+
 /*
 Leaflet overrides
 */
 
+.leaflet-control {
+    font: 12px "Libre Franklin", 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.leaflet-tooltip {
+    background-color: white;
+    border: lightgrey;
+    color: #003767;
+    font: 14px "Libre Franklin", 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    padding: 8px;
+    margin-top: 15px;
+}
+
+.leaflet-control-layers-base label:hover,
+.leaflet-control-layers-overlays label:hover {
+    color: #ffd24f;
+    cursor: pointer;
+}
+
+.leaflet-control-zoom a:hover {
+    color: #ffd24f;
+    cursor: pointer;
+}
+
+
 /*
 Marker cluster plugin CSS overrides
 */
+.marker-cluster-small,
+.marker-cluster-medium{
+    background-color: rgba(255,210,79,.7);
+}
+.marker-cluster-large {
+	background-color: rgba(0,55,103,.7);
+    }
+    
 
+.marker-cluster-small div,
+.marker-cluster-medium div{
+    background-color:#ffd24f; 
+    color: #003767;
+}
+.marker-cluster-large div {
+    background-color: #003767;
+    color: #ffd24f;
+    }
+
+    .marker-cluster div {
+        font: 10px "Libre Franklin", 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
 

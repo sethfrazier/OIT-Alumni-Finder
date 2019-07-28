@@ -3,10 +3,11 @@
 
 <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>OIT Alumni Finder</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="site.webmanifest">
     <link rel="apple-touch-icon" href="icon.png">
     <!-- Place favicon.ico in the root directory -->
@@ -68,9 +69,11 @@
         <div class="overlay__headingContainer ">
             <h2>Oregon Tech Alumni</h2>
         </div>     
-        <p>This map allows you to explore where alumni live by zip code, through the Western US.</p>
-        <p>Select information about the alumni and see where there might be concentrations of alumni.</p>
-        <p>This is a tool for the OIT University Development and Alumni Relations staff to plan alumni connections and events.</p>    
+        <p>This map allows you to explore where Oregon Tech alumni live, by zip code, throughout the Western United States.</p>
+        <p>Select college, degree, or year of graduation to see where there might be concentrations of alumni with your selected criteria. 
+            You may also identify alumni married to other alumni. </p>
+        <p>This is a tool for the Oregon Tech University Development and Alumni Relations staff to plan alumni connections and events.</p> 
+        <p>To return to map default view, select “ALL” in the “Select a College” dropdown box.</p>   
     </div>  
     
     <div id="filter-feedback" class="filter-feedback">0 results for selected filter(s)</div>
@@ -81,9 +84,7 @@
 
             <h2>Alumni Degree<br><span id = "displayed-degree">All Degrees</span></h2>
 
-            
-            <!--Maybe this should be radiobuttons?-->
-
+            <h2>Alumni Graduation Year<br><span id = "displayed-year">All Years</span></h2>
 
             <label for="neigbhorbood-select-box">Select a College:</label>
             
@@ -104,14 +105,14 @@
                 <option value ="ALL">ALL</option>     
             </select>
 
-            <!--<label for="married-select-box">Select if married to other alumns and friends of Oregon Tech:</label>
+            <!--<label for="married-select-box">Select if married to other alumns of Oregon Tech:</label>
             <select name="married-select-box" id="married-select-box">
                 <option value ="" disabled>Select an option</option>
                 <option value ="ALL">ALL</option>     
             </select>-->
 
-            <!--<div class="filters__container">
-                <h3>Possible selection of college</h3>
+            <div class="filters__container">
+                <!--<h3>Possible selection of college</h3>
                 <form class="filters" name="treeConditionFilter">
                     <label><input type="radio" name="treeCondition" value="" title="No tree condition filter." checked> All<br></label>
                     <label><input type="radio" name="treeCondition" value="good" title="Filter trees where tree condition is good." disabled> Alumni<br></label>
@@ -119,7 +120,7 @@
                     <label><input type="radio" name="treeCondition" value="poor" title="Filter trees where tree condition is poor." disabled> Board Member<br></label>
                     <label><input type="radio" name="treeCondition" value="dead" title="Filter trees where tree condition is dead." disabled> Faculty/Staff<br></label>
                 </form>-->
-                <h3>Filter Alumni who are married to other Alumni</h3>
+                <h4>Filter Alumni who are married to other Alumni</h4>
                     <form class=filters>
                     <label><input id="alumni-married-alumni-checkbox" type="checkbox" name="alumniFilter" value="alumni" title="Filter Alumni who are married to other Alumni."> Alumni married to Alumni Only<br></label>
                 </form>
